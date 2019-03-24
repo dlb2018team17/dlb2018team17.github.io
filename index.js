@@ -32,7 +32,10 @@ document.addEventListener("DOMContentLoaded", () => {
       log(`Not image file (${file.type})`);
       return;
     }
+
     document.getElementById("log").innerHTML = "";
+    document.getElementById("preloader").style.display="block"
+
     // <img src=~>で読み込むとExifが考慮されないので
     // JavaScript-Load-Imageで読み込み
     loadImage(file, img => {
@@ -170,6 +173,8 @@ document.addEventListener("DOMContentLoaded", () => {
         canvas.getContext("2d").drawImage(canvasAveraged[0], 80, 80, 160, 160);
     }
     selector.value = 1;
+
+    document.getElementById("preloader").style.display="none";
   }
 
   selector.addEventListener("input", () => {

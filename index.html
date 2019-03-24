@@ -3,6 +3,11 @@
   <head>
     <meta charset="utf-8">
     <title>自分の顔をちょっと良くしてみよう</title>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.15.3/dist/tf.min.js"></script>
     <!-- https://github.com/auduno/clmtrackr -->
     <!-- minifyされたスクリプトはエラーになる -->
@@ -12,21 +17,72 @@
     <script src="index.js"></script>
   </head>
   <body>
-    <h1>自分の顔をちょっと良くしてみよう</h1>
-    <form>
-      <input id="inputFile" type="file" style="display:none">
-      <button id="buttonFile">ファイルを選択</button>
-    </form>
-    <div style="position: relative">
-      <canvas id="originalImage"></canvas>
-      <canvas id="originalOverlay" style="position: absolute; top: 0px; left: 0px"></canvas>
+    <div class="container">
+      <div class="section">
+        <h4>
+          自分の顔をちょっと良くしてみよう
+        </h4>
+        <p>
+          「人が最も美しいと感じる顔は、平均的な顔である」という一説があります。
+          また、Variational Autoencoder (VAE)の潜在変数は入力画像の特徴を抽出したものです。
+          あなたの顔をVAEに入力して、潜在変数を平均値に近づけ、この説を検証してみましょう。
+        </p>
+        <ul class="browser-default">
+          <li>全ての処理をブラウザ内で行うので、入力した画像がネットワークにアップロードされることはありません</li>
+          <li>実行の際に、約36 MBのモデルをダウンロードします</li>
+        </ul>
+      </div>
+      <div class="section">
+        <input id="inputFile" type="file" style="display:none">
+        <button class="btn-large waves-effect waves-light" id="buttonFile">
+          <i class="material-icons left">image</i>
+          画像を入力
+        </button>
+      </div>
+      <div id="preloader" class="preloader-wrapper big active" style="display: none">
+        <div class="spinner-layer">
+          <div class="circle-clipper left">
+            <div class="circle"></div>
+          </div>
+          <div class="gap-patch">
+            <div class="circle"></div>
+          </div>
+          <div class="circle-clipper right">
+            <div class="circle"></div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <h5>顔認識</h5>
+        <div style="position: relative">
+          <canvas id="originalImage"></canvas>
+          <canvas id="originalOverlay" style="position: absolute; top: 0px; left: 0px"></canvas>
+        </div>
+      </div>
+      <div class="section">
+        <h5>平均化</h5>
+        <div>
+          <canvas id="canvas" width="320" height="320"></canvas>
+        </div>
+        <div class="range-field" style="width: 320px">
+          <input id="selector" type="range" min="0" max="11">
+        </div>
+      </div>
+      <div class="section">
+        <h5>ログ</h5>
+        <div id="log">
+        </div>
+      </div>
     </div>
-    <div>
-      <canvas id="canvas" width="320" height="320"></canvas>
-    </div>
-    <div>
-      <input id="selector" type="range" min="0" max="11" style="width: 320px">
-    <div id="log">
-    </div>
+
+    <footer class="page-footer">
+      <div class="footer-copyright">
+        <div class="container">
+          Deep Learning基礎講座 2018 Team 17
+        </div>
+      </div>
+    </footer>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   </body>
 </html>
