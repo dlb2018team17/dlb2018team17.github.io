@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   var buttonFile = document.getElementById("buttonFile");
+  var buttonCamera = document.getElementById("buttonCamera");
   var inputFile = document.getElementById("inputFile");
   var originalImage = document.getElementById("originalImage");
   var originalOverlay = document.getElementById("originalOverlay");
@@ -9,8 +10,16 @@ document.addEventListener("DOMContentLoaded", () => {
   canvasOriginal.height = 160;
 
   var original;
-  var ctrack;
+
+  var ctrack = new clm.tracker();
+  ctrack.init();
+  // 0: トラッキング無し
+  // 1: 画像用にトラッキング中
+  // 2: 動画用にトラッキング中
+  var trackingMode = 0;
+
   var drawDetectionRequest;
+  var stream;
 
   function log(message) {
     var div = document.createElement("div");
@@ -58,14 +67,55 @@ document.addEventListener("DOMContentLoaded", () => {
         originalOverlay.height = h;
         canvasImage.drawImage(original, 0, 0, w, h);
 
-        if (!ctrack) {
-          ctrack = new clm.tracker({stopOnConvergence: true});
-          ctrack.init();
+        document.getElementById("originalImage").style.display = "inline-block";
+        document.getElementById("video").style.display = "none";
+
+        if (trackingMode != 0) {
+          ctrack.stop();
+          ctrack.reset();
         }
         ctrack.start(originalImage);
-        window.ctrack = ctrack;
+        trackingMode = 1;
         drawDetection();
     }, {orientation: true});
+  });
+
+  buttonCamera.addEventListener("click", e => {
+    e.preventDefault();
+
+    if (!navigator.mediaDevices) {
+      log("Media devices are not supported");
+      return;
+    }
+
+    navigator.mediaDevices.getUserMedia({video: {facingMode: "user"}})
+      .catch(e => {
+        log(`getUserMedia failed (${e.name}: ${e.message})`);
+      })
+      .then(s => {
+        stream = s;
+        var video = document.getElementById("video");
+        video.srcObject = stream;
+        video.onloadedmetadata = e => {
+          video.play();
+          originalOverlay.width = video.videoWidth;
+          originalOverlay.height = video.videoHeight;
+          // これを設定しておかないとclmtrackrがエラーになる
+          video.width = video.videoWidth;
+          video.height = video.videoHeight
+
+          document.getElementById("originalImage").style.display = "none";
+          document.getElementById("video").style.display = "inline-block";
+
+          if (trackingMode != 0) {
+            ctrack.stop();
+            ctrack.reset();
+          }
+          ctrack.start(video);
+          trackingMode = 2;
+          drawDetection();
+        };
+      });
   });
 
   // 顔認識の結果を表示
@@ -79,13 +129,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.addEventListener("clmtrackrNotFound", () => {
+    if (trackingMode!=1)
+      return;
     ctrack.stop();
+    trackingMode = 0;
     cancelAnimationFrame(drawDetectionRequest);
     log("Failed to detect face (not found)");
   });
 
   document.addEventListener("clmtrackrLost", () => {
+    if (trackingMode!=1)
+      return;
     ctrack.stop();
+    trackingMode = 0;
     cancelAnimationFrame(drawDetectionRequest);
     log("Failed to detect face (lost)");
   });
@@ -95,6 +151,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 認識成功
   document.addEventListener("clmtrackrConverged", () => {
+    if (trackingMode!=1)
+      return;
+    trackingMode = 0;
     ctrack.stop();
     cancelAnimationFrame(drawDetectionRequest);
     log("Succeeded to detect face");
@@ -129,6 +188,59 @@ document.addEventListener("DOMContentLoaded", () => {
     c.scale(1/scale, 1/scale);
     c.translate(-eye_cx, -eye_cy);
     c.drawImage(original, 0, 0, original.width, original.height);
+
+    c.restore();
+
+    // 顔部分を別のキャンバスに貼り付ける
+    var contextTemp = canvasOriginal.getContext("2d");
+    contextTemp.drawImage(canvas, -80, -80, 320, 320);
+
+    makeAverageFace();
+  });
+
+  document.getElementById("buttonCameraOK").addEventListener("click", e => {
+    e.preventDefault();
+
+    var pos = ctrack.getCurrentPosition();
+    if (!pos)
+      return;
+    ctrack.stop();
+    trackingMode = 0;
+    cancelAnimationFrame(drawDetectionRequest);
+
+    // 動画をキャプチャして画像用のキャンバスに貼り付ける
+    var video = document.getElementById("video");
+    originalImage.width = video.width;
+    originalImage.height = video.height;
+    var c = originalImage.getContext("2d");
+    c.drawImage(video, 0, 0, video.width, video.height);
+    stream.getVideoTracks()[0].stop();
+    originalImage.style.display = "inline-block";
+    video.style.display = "none";
+
+    // 右目の中心が(61+80, 84+80)、左目の中心が(101+80, 84+80)になるように貼り付け
+    c = canvas.getContext("2d");
+    c.save();
+
+    c.fillStyle = "rgb(128, 128, 128)";
+    c.fillRect(0, 0, 320, 320);
+
+    var eye_rx = pos[27][0];
+    var eye_ry = pos[27][1];
+    var eye_lx = pos[32][0];
+    var eye_ly = pos[32][1];
+
+    eye_cx = (eye_rx + eye_lx)/2;
+    eye_cy = (eye_ry + eye_ly)/2;
+
+    var angle = Math.atan2(eye_ly-eye_ry, eye_lx-eye_rx);
+    var scale = Math.hypot(eye_ly-eye_ry, eye_lx-eye_rx) / (101-61);
+
+    c.translate((61+101)/2+80, 84+80);
+    c.rotate(-angle);
+    c.scale(1/scale, 1/scale);
+    c.translate(-eye_cx, -eye_cy);
+    c.drawImage(originalImage, 0, 0, originalImage.width, originalImage.height);
 
     c.restore();
 

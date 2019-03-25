@@ -38,6 +38,10 @@
           <i class="material-icons left">image</i>
           画像を入力
         </button>
+        <button class="btn-large waves-effect waves-light" id="buttonCamera">
+          <i class="material-icons left">camera_alt</i>
+          カメラで撮影
+        </button>
       </div>
       <div id="preloader" class="preloader-wrapper big active" style="display: none">
         <div class="spinner-layer">
@@ -56,7 +60,18 @@
         <h5>顔認識</h5>
         <div style="position: relative">
           <canvas id="originalImage"></canvas>
+          <video id="video"></video>
           <canvas id="originalOverlay" style="position: absolute; top: 0px; left: 0px"></canvas>
+        </div>
+        <div>
+          <button class="btn waves-effect waves-light" id="buttonCameraOK">
+            <i class="material-icons left">check</i>
+            OK
+          </button>
+          <button class="btn waves-effect waves-light" id="buttonCameraCancel">
+            <i class="material-icons left">cancel</i>
+            キャンセル
+          </button>
         </div>
       </div>
       <div class="section">
