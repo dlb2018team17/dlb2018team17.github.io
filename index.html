@@ -34,13 +34,17 @@
       </div>
       <div class="section">
         <input id="inputFile" type="file" style="display:none">
-        <button class="btn-large waves-effect waves-light" id="buttonFile">
-          <i class="material-icons left">image</i>
-          画像を入力
-        </button>
         <button class="btn-large waves-effect waves-light" id="buttonCamera">
           <i class="material-icons left">camera_alt</i>
           カメラで撮影
+        </button>
+        <button class="btn-large waves-effect waves-light" id="buttonFile">
+          <i class="material-icons left">folder</i>
+          写真を選択
+        </button>
+        <button class="btn-large waves-effect waves-light" id="buttonSample">
+          <i class="material-icons left">photo</i>
+          サンプル写真で試す
         </button>
       </div>
       <div id="preloader" class="preloader-wrapper big active" style="display: none">
@@ -64,11 +68,14 @@
           <canvas id="originalOverlay" style="position: absolute; top: 0px; left: 0px"></canvas>
         </div>
         <div>
+          <a id="sampleSource"></a>
+        </div>
+        <div>
           <button class="btn waves-effect waves-light" id="buttonCameraOK">
             <i class="material-icons left">check</i>
             OK
           </button>
-          <button class="btn waves-effect waves-light" id="buttonCameraCancel">
+          <button class="btn waves-effect waves-light" id="buttonCameraCancel" disabled><!-- TODO -->
             <i class="material-icons left">cancel</i>
             キャンセル
           </button>

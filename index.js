@@ -116,6 +116,65 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   });
 
+  // サンプルをcanvasに読みこんで顔認識を開始
+  var sample = [
+    {
+      url: "sample/sample1.jpg",
+      source: "モナ・リザ",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Mona_Lisa,_by_Leonardo_da_Vinci,_from_C2RMF_retouched.jpg",
+    }, {
+      url: "sample/sample2.jpg",
+      source: "フィンセント・ファン・ゴッホの自画像",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:VanGogh_1887_Selbstbildnis.jpg",
+    }, {
+      url: "sample/sample3.png",
+      source: "StyleGAN",
+      sourceUrl: "https://github.com/NVlabs/stylegan/blob/b061cc4effdcd1da86a0cc6e61e64b575cf35ffa/stylegan-teaser.png",
+    }];
+  var previousSample = -1;
+  document.getElementById("buttonSample").addEventListener("click", e => {
+    e.preventDefault();
+
+    document.getElementById("log").innerHTML = "";
+    document.getElementById("preloader").style.display="block"
+
+    original = new Image();
+    original.addEventListener("load", () => {
+      // 幅も高さも320px以下になるように縮小
+      var w = original.width;
+      var h = original.height;
+      if (w>h && w>320) {
+        h *= 320/w;
+        w = 320;
+      } else if (h>320) {
+        w *= 320/h;
+        h = 320;
+      }
+      var canvasImage = originalImage.getContext("2d");
+      var canvasOverlay = originalOverlay.getContext("2d");
+      originalImage.width = w;
+      originalImage.height = h;
+      originalOverlay.width = w;
+      originalOverlay.height = h;
+      canvasImage.drawImage(original, 0, 0, w, h);
+
+      document.getElementById("originalImage").style.display = "inline-block";
+      document.getElementById("video").style.display = "none";
+
+      ctrack.stop();
+      ctrack.reset();
+      ctrack.start(originalImage);
+      trackingMode = 1;
+      drawDetection();
+    });
+    var id = (previousSample+1)%3;
+    previousSample = id;
+    original.src = sample[id].url;
+    var source = document.getElementById("sampleSource");
+    source.textContent = sample[id].source;
+    source.href = sample[id].sourceUrl;
+  });
+
   // 顔認識の結果を表示
   function drawDetection() {
     var c = originalOverlay.getContext("2d");
