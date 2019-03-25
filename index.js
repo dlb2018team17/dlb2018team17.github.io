@@ -30,6 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // <input type="file">をクリックする
   buttonFile.addEventListener("click", e => {
     e.preventDefault();
+    // 同じファイルを選択した場合でもchangeを発火させる
+    inputFile.value = "";
     inputFile.click();
   });
 
