@@ -72,10 +72,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("originalImage").style.display = "inline-block";
         document.getElementById("video").style.display = "none";
 
-        if (trackingMode != 0) {
-          ctrack.stop();
-          ctrack.reset();
-        }
+        ctrack.stop();
+        ctrack.reset();
         ctrack.start(originalImage);
         trackingMode = 1;
         drawDetection();
@@ -109,10 +107,8 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("originalImage").style.display = "none";
           document.getElementById("video").style.display = "inline-block";
 
-          if (trackingMode != 0) {
-            ctrack.stop();
-            ctrack.reset();
-          }
+          ctrack.stop();
+          ctrack.reset();
           ctrack.start(video);
           trackingMode = 2;
           drawDetection();
@@ -155,8 +151,8 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("clmtrackrConverged", () => {
     if (trackingMode!=1)
       return;
-    trackingMode = 0;
     ctrack.stop();
+    trackingMode = 0;
     cancelAnimationFrame(drawDetectionRequest);
     log("Succeeded to detect face");
 
