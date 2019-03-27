@@ -228,7 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
   var canvasFaceAveraged;
 
   function makeAverageFace(image) {
-    // 右目の中心が(61+80, 84+80)、左目の中心が(101+80, 84+80)になるように貼り付け
+    // 右目の中心が(61+48, 84+48)、左目の中心が(101+48, 84+48)になるように貼り付け
     var pos = ctrack.getCurrentPosition();
     var eye_rx = pos[27][0];
     var eye_ry = pos[27][1];
@@ -251,9 +251,9 @@ document.addEventListener("DOMContentLoaded", () => {
     context.save();
 
     context.fillStyle = "rgb(128, 128, 128)";
-    context.fillRect(0, 0, 320, 320);
+    context.fillRect(0, 0, 256, 256);
 
-    context.translate((61+101)/2+80, 84+80);
+    context.translate((61+101)/2+48, 84+48);
     context.rotate(-angle);
     context.scale(1/scale, 1/scale);
     context.translate(-eye_cx, -eye_cy);
@@ -266,7 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
     canvasFaceOriginal.width = 160;
     canvasFaceOriginal.height = 160;
     canvasFaceOriginal.getContext("2d").drawImage(
-      averageCanvas, -80, -80, 320, 320);
+      averageCanvas, -48, -48, 256, 256);
 
     makeAverageFaceAsync();
   }
@@ -307,7 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Tensorからの変換に時間が掛かるので1枚目を生成した時点で描画
       if (i==0)
         averageCanvas.getContext("2d").drawImage(
-          canvasFaceAveraged[0], 80, 80, 160, 160);
+          canvasFaceAveraged[0], 48, 48, 160, 160);
     }
 
     selector.value = 1;
@@ -320,6 +320,6 @@ document.addEventListener("DOMContentLoaded", () => {
     else
       c = canvasFaceAveraged[selector.value-1];
 
-    averageCanvas.getContext("2d").drawImage(c, 80, 80, 160, 160);
+    averageCanvas.getContext("2d").drawImage(c, 48, 48, 160, 160);
   });
 });
