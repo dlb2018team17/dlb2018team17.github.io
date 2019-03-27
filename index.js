@@ -226,6 +226,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   var canvasFaceOriginal;
   var canvasFaceAveraged;
+  var canvasZOriginal;
+  var canvasZAveraged;
 
   function makeAverageFace(image) {
     // 右目の中心が(61+48, 84+48)、左目の中心が(101+48, 84+48)になるように貼り付け
@@ -247,26 +249,35 @@ document.addEventListener("DOMContentLoaded", () => {
     var angle = Math.atan2(eye_ly-eye_ry, eye_lx-eye_rx);
     var scale = Math.hypot(eye_ly-eye_ry, eye_lx-eye_rx) / (101-61);
 
-    var context = averageCanvas.getContext("2d");
-    context.save();
+    var ctx = averageCanvas.getContext("2d");
+    ctx.save();
 
-    context.fillStyle = "rgb(128, 128, 128)";
-    context.fillRect(0, 0, 256, 256);
+    ctx.fillStyle = "rgb(128, 128, 128)";
+    ctx.fillRect(0, 0, 256, 256);
 
-    context.translate((61+101)/2+48, 84+48);
-    context.rotate(-angle);
-    context.scale(1/scale, 1/scale);
-    context.translate(-eye_cx, -eye_cy);
-    context.drawImage(image, 0, 0, image.width, image.height);
+    ctx.translate((61+101)/2+48, 84+48);
+    ctx.rotate(-angle);
+    ctx.scale(1/scale, 1/scale);
+    ctx.translate(-eye_cx, -eye_cy);
+    ctx.drawImage(image, 0, 0);
 
-    context.restore();
+    ctx.restore();
+    ctx.fillStyle = "rgb(255, 255, 255)";
+    ctx.fillRect(0, 256, 256, 16);
 
     // 顔部分を取得
     canvasFaceOriginal = document.createElement("canvas");
     canvasFaceOriginal.width = 160;
     canvasFaceOriginal.height = 160;
     canvasFaceOriginal.getContext("2d").drawImage(
-      averageCanvas, -48, -48, 256, 256);
+      averageCanvas, -48, -48);
+
+    canvasZOriginal = document.createElement("canvas");
+    canvasZOriginal.width = 256;
+    canvasZOriginal.height = 1;
+    ctx = canvasZOriginal.getContext("2d");
+    ctx.fillStyle = "rgb(255, 255, 255)";
+    ctx.fillRect(0, 0, 256, 1);
 
     makeAverageFaceAsync();
   }
@@ -297,29 +308,57 @@ document.addEventListener("DOMContentLoaded", () => {
       ["decoder_16/Sigmoid", "add_18"]);
     log("Prediction finished");
 
+    var z = await tensorZ.data();
+
     canvasFaceAveraged = new Array(11);
+    canvasZAveraged = new Array(11);
+
     for (var i=0; i<=10; i++) {
       canvasFaceAveraged[i] = document.createElement("canvas");
       await tf.browser.toPixels(
         tensorAveraged.slice(i, 1).reshape([160, 160, 3]),
         canvasFaceAveraged[i]);
+
+      canvasZAveraged[i] = document.createElement("canvas");
+      canvasZAveraged[i].width = 256;
+      canvasZAveraged[i].height = 1;
+      var ctx = canvasZAveraged[i].getContext("2d");
+      var data = ctx.getImageData(0, 0, 256, 1);
+      for (var j=0; j<256; j++) {
+        var v = Math.tanh(z[i*256+j])/2+0.5;
+        data.data[j*4+0] = 240*v+20*(1-v);
+        data.data[j*4+1] = 230*v+40*(1-v);
+        data.data[j*4+2] = 220*v+60*(1-v);
+        data.data[j*4+3] = 255;
+      }
+      ctx.putImageData(data, 0, 0);
+
       log(`converted to canvas ${i}/10`);
+
       // Tensorからの変換に時間が掛かるので1枚目を生成した時点で描画
-      if (i==0)
-        averageCanvas.getContext("2d").drawImage(
-          canvasFaceAveraged[0], 48, 48, 160, 160);
+      if (i==0) {
+        var ctx = averageCanvas.getContext("2d");
+        ctx.drawImage(canvasFaceAveraged[0], 48, 48);
+        ctx.drawImage(canvasZAveraged[0], 0, 256, 256, 16);
+      }
     }
 
     selector.value = 1;
   }
 
   selector.addEventListener("input", () => {
-    var c;
-    if (selector.value==0)
-      c = canvasFaceOriginal;
-    else
-      c = canvasFaceAveraged[selector.value-1];
+    var face;
+    var z;
+    if (selector.value==0) {
+      face = canvasFaceOriginal;
+      z = canvasZOriginal;
+    } else {
+      face = canvasFaceAveraged[selector.value-1];
+      z = canvasZAveraged[selector.value-1];
+    }
 
-    averageCanvas.getContext("2d").drawImage(c, 48, 48, 160, 160);
+    var ctx = averageCanvas.getContext("2d");
+    ctx.drawImage(face, 48, 48);
+    ctx.drawImage(z, 0, 256, 256, 16);
   });
 });
