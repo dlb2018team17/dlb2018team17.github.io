@@ -33,49 +33,36 @@
         </ul>
       </div>
       <div class="section">
-        <input id="inputFile" type="file" style="display:none">
-        <button class="btn-large waves-effect waves-light" id="buttonCamera">
+        <button id="buttonCamera" class="btn-large waves-effect waves-light">
           <i class="material-icons left">camera_alt</i>
           カメラで撮影
         </button>
-        <button class="btn-large waves-effect waves-light" id="buttonFile">
+        <button id="buttonFile" class="btn-large waves-effect waves-light">
           <i class="material-icons left">folder</i>
           写真を選択
         </button>
-        <button class="btn-large waves-effect waves-light" id="buttonSample">
+        <button id="buttonSample" class="btn-large waves-effect waves-light">
           <i class="material-icons left">photo</i>
           サンプル写真で試す
         </button>
-      </div>
-      <div id="preloader" class="preloader-wrapper big active" style="display: none">
-        <div class="spinner-layer">
-          <div class="circle-clipper left">
-            <div class="circle"></div>
-          </div>
-          <div class="gap-patch">
-            <div class="circle"></div>
-          </div>
-          <div class="circle-clipper right">
-            <div class="circle"></div>
-          </div>
-        </div>
+        <input id="inputFile" type="file" style="display:none">
       </div>
       <div class="section">
         <h5>顔認識</h5>
         <div style="position: relative">
-          <canvas id="originalImage"></canvas>
-          <video id="video" playsinline></video>
-          <canvas id="originalOverlay" style="position: absolute; top: 0px; left: 0px"></canvas>
+          <canvas id="detectionImage"></canvas>
+          <video id="detectionVideo" playsinline></video>
+          <canvas id="detectionOverlay" style="position: absolute; top: 0px; left: 0px"></canvas>
         </div>
         <div>
           <a id="sampleSource"></a>
         </div>
         <div>
-          <button class="btn waves-effect waves-light" id="buttonCameraOK">
+          <button id="detectionOK" class="btn waves-effect waves-light">
             <i class="material-icons left">check</i>
             OK
           </button>
-          <button class="btn waves-effect waves-light" id="buttonCameraCancel" disabled><!-- TODO -->
+          <button id="detectionCancel" class="btn waves-effect waves-light" disabled><!-- TODO -->
             <i class="material-icons left">cancel</i>
             キャンセル
           </button>
@@ -84,7 +71,7 @@
       <div class="section">
         <h5>平均化</h5>
         <div>
-          <canvas id="canvas" width="320" height="320"></canvas>
+          <canvas id="averageCanvas" width="320" height="320"></canvas>
         </div>
         <div class="range-field" style="width: 320px">
           <input id="selector" type="range" min="0" max="11">
