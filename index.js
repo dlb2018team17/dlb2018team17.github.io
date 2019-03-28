@@ -85,6 +85,8 @@ document.addEventListener("DOMContentLoaded", () => {
           sectionDetection.style.display = "block";
           detectionVideo.style.display = "inline-block";
           divDetectionButton.style.display = "block";
+          detectionOK.disabled = false;
+          detectionCancel.disabled = false;
 
           ctrack.stop();
           ctrack.reset();
@@ -240,6 +242,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!ctrack.getCurrentPosition())
       return;
+
+    detectionOK.disabled = true;
+    detectionCancel.disabled = true;
+
     stopDetection();
 
     // 動画をキャプチャ
@@ -261,6 +267,19 @@ document.addEventListener("DOMContentLoaded", () => {
     detectionVideo.style.display = "none";
 
     makeAverageFace(image);
+  });
+
+  // カメラからの撮影でキャンセルをクリック
+  detectionCancel.addEventListener("click", e => {
+    e.preventDefault();
+
+    stopDetection();
+
+    detectionOK.disabled = true;
+    detectionCancel.disabled = true;
+    enableButton();
+
+    initialize();
   });
 
   var canvasFaceOriginal;
