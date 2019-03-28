@@ -87,9 +87,22 @@ main {
         <div>
           <canvas id="averageCanvas" width="256" height="272"></canvas>
         </div>
-        <div class="range-field" style="width: 256px">
-          <input id="selector" type="range" min="0" max="11">
-        </div>
+        <p>
+          <div>
+            <label>
+              <span>平均化率:</span>
+              <div class="range-field" style="width: 256px">
+                <input id="averageSelector" type="range" min="0" max="100" step="10">
+              </div>
+            </label>
+          </div>
+          <div>
+            <label>
+              <input id="averageOriginal" type="checkbox">
+              <span>元画像を表示</span>
+            </label>
+          </div>
+        </p>
       </div>
       <div class="divider"></div>
       <div class="section">

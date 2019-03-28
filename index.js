@@ -15,7 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
   var detectionCancel = document.getElementById("detectionCancel");
   var sectionAveraging = document.getElementById("sectionAveraging");
   var averageCanvas = document.getElementById("averageCanvas");
-  var selector = document.getElementById("selector");
+  var averageSelector = document.getElementById("averageSelector");
+  var averageOriginal = document.getElementById("averageOriginal");
 
   function log(message) {
     var div = document.createElement("div");
@@ -289,8 +290,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function makeAverageFace(image) {
     sectionAveraging.style.display = "block";
-    selector.value = 1;
-    selector.disabled = true;
+    averageSelector.value = 0;
+    averageSelector.disabled = true;
+    averageOriginal.checked = true;
+    averageOriginal.disabled = true;
 
     // 右目の中心が(61+48, 84+48)、左目の中心が(101+48, 84+48)になるように貼り付け
     var pos = ctrack.getCurrentPosition();
@@ -399,29 +402,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Tensorからの変換に時間が掛かるので1枚目を生成した時点で描画
       if (i==0) {
-        var ctx = averageCanvas.getContext("2d");
-        ctx.drawImage(canvasFaceAveraged[0], 48, 48);
-        ctx.drawImage(canvasZAveraged[0], 0, 256, 256, 16);
+        drawAveragedFace(0);
+        averageOriginal.checked = true;
       }
     }
 
-    selector.disabled = false;
+    averageSelector.disabled = false;
+    averageOriginal.disabled = false;
+    averageOriginal.checked = false;
     enableButton();
   }
 
-  selector.addEventListener("input", () => {
+  averageSelector.addEventListener("input", e => {
+    e.preventDefault();
+
+    averageOriginal.checked = false;
+    drawAveragedFace(averageSelector.value);
+  });
+
+  averageOriginal.addEventListener("change", e => {
+    e.preventDefault();
+
+    if (averageOriginal.checked)
+      drawAveragedFace(-1);
+    else
+      drawAveragedFace(averageSelector.value);
+  });
+
+  // 顔を描画
+  // pが負値ならば元画像
+  function drawAveragedFace(p) {
     var face;
     var z;
-    if (selector.value==0) {
+    if (p<0) {
       face = canvasFaceOriginal;
       z = canvasZOriginal;
     } else {
-      face = canvasFaceAveraged[selector.value-1];
-      z = canvasZAveraged[selector.value-1];
+      face = canvasFaceAveraged[p/10];
+      z = canvasZAveraged[p/10];
     }
 
     var ctx = averageCanvas.getContext("2d");
     ctx.drawImage(face, 48, 48);
     ctx.drawImage(z, 0, 256, 256, 16);
-  });
+  }
 });
