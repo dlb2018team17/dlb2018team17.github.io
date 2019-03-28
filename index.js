@@ -4,6 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
   var buttonFile = document.getElementById("buttonFile");
   var buttonSample = document.getElementById("buttonSample");
   var inputFile = document.getElementById("inputFile");
+  var status = document.getElementById("status");
+  var progress = document.getElementById("progress");
   var sectionDetection = document.getElementById("sectionDetection");
   var detectionImage = document.getElementById("detectionImage");
   var detectionVideo = document.getElementById("detectionVideo");
@@ -17,11 +19,29 @@ document.addEventListener("DOMContentLoaded", () => {
   var averageCanvas = document.getElementById("averageCanvas");
   var averageSelector = document.getElementById("averageSelector");
   var averageOriginal = document.getElementById("averageOriginal");
+  var divLog = document.getElementById("divLog");
 
   function log(message) {
+    status.textContent = message;
+
     var div = document.createElement("div");
     div.textContent = message;
-    document.getElementById("log").appendChild(div);
+    divLog.appendChild(div);
+  }
+
+  // 0: 0%, 1: 進行中, 2: 100%
+  function changeProgress(p) {
+    if (p==1) {
+      progress.classList.remove("determinate");
+      progress.classList.add("indeterminate");
+    } else {
+      progress.classList.remove("indeterminate");
+      progress.classList.add("determinate");
+    }
+    if (p==0)
+      progress.style.width = "0";
+    else
+      progress.style.width = "100%";
   }
 
   // フェイストラッキング
@@ -34,12 +54,15 @@ document.addEventListener("DOMContentLoaded", () => {
   var lastPosition;
 
   function initialize() {
+    status.textContent = "Initialized";
+    changeProgress(0);
     sectionDetection.style.display = "none";
     detectionImage.style.display = "none";
     detectionVideo.style.display = "none";
     divSampleSource.style.display = "none";
     divDetectionButton.style.display = "none";
     sectionAveraging.style.display = "none";
+    divLog.innerHTML = "";
   }
   initialize()
 
@@ -76,6 +99,8 @@ document.addEventListener("DOMContentLoaded", () => {
         detectionVideo.onloadedmetadata = e => {
           initialize();
           disableButton();
+          log("Face detecting");
+          changeProgress(1);
 
           detectionVideo.play();
           detectionOverlay.width = detectionVideo.videoWidth;
@@ -121,6 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initialize();
     disableButton();
+    changeProgress(1);
 
     // <img src=~>で読み込むとExifが考慮されないので
     // JavaScript-Load-Imageで読み込み
@@ -149,6 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initialize();
     disableButton();
+    changeProgress(1);
     divSampleSource.style.display = "block";
 
     var id = (previousSample+1)%3;
@@ -190,6 +217,8 @@ document.addEventListener("DOMContentLoaded", () => {
     sectionDetection.style.display = "block";
     detectionImage.style.display = "inline-block";
 
+    log("Face detecting");
+
     ctrack.stop();
     ctrack.reset();
     lastPosition = undefined;
@@ -221,6 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     stopDetection();
     enableButton();
+    changeProgress(0);
     log("Failed to detect face (not found)");
   });
 
@@ -235,6 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
       makeAverageFace(originalImage);
     } else {
       enableButton();
+      changeProgress(0);
     }
   });
 
@@ -290,6 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
     detectionOK.disabled = true;
     detectionCancel.disabled = true;
     enableButton();
+    changeProgress(0);
 
     initialize();
   });
@@ -422,6 +454,8 @@ document.addEventListener("DOMContentLoaded", () => {
     averageOriginal.disabled = false;
     averageOriginal.checked = false;
     enableButton();
+    log("OK");
+    changeProgress(2);
   }
 
   averageSelector.addEventListener("input", e => {
