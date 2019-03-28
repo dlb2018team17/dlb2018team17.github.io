@@ -7,6 +7,18 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+/* https://materializecss.com/footer.html#sticky-footer */
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+}
+    </style>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.15.3/dist/tf.min.js"></script>
     <!-- https://github.com/auduno/clmtrackr -->
@@ -17,7 +29,7 @@
     <script src="index.js"></script>
   </head>
   <body>
-    <div class="container">
+    <main class="container">
       <div class="section">
         <h4>
           自分の顔をちょっと良くしてみよう
@@ -82,7 +94,7 @@
         <div id="log">
         </div>
       </div>
-    </div>
+    </main>
 
     <footer class="page-footer">
       <div class="footer-copyright">
