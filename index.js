@@ -4,12 +4,16 @@ document.addEventListener("DOMContentLoaded", () => {
   var buttonFile = document.getElementById("buttonFile");
   var buttonSample = document.getElementById("buttonSample");
   var inputFile = document.getElementById("inputFile");
+  var sectionDetection = document.getElementById("sectionDetection");
   var detectionImage = document.getElementById("detectionImage");
   var detectionVideo = document.getElementById("detectionVideo");
   var detectionOverlay = document.getElementById("detectionOverlay");
+  var divSampleSource = document.getElementById("divSampleSource");
   var sampleSource = document.getElementById("sampleSource");
+  var divDetectionButton = document.getElementById("divDetectionButton");
   var detectionOK = document.getElementById("detectionOK");
   var detectionCancel = document.getElementById("detectionCancel");
+  var sectionAveraging = document.getElementById("sectionAveraging");
   var averageCanvas = document.getElementById("averageCanvas");
   var selector = document.getElementById("selector");
 
@@ -26,6 +30,28 @@ document.addEventListener("DOMContentLoaded", () => {
   // 1: 画像用にトラッキング中
   // 2: 動画用にトラッキング中
   var trackingMode = 0;
+
+  function initialize() {
+    sectionDetection.style.display = "none";
+    detectionImage.style.display = "none";
+    detectionVideo.style.display = "none";
+    divSampleSource.style.display = "none";
+    divDetectionButton.style.display = "none";
+    sectionAveraging.style.display = "none";
+  }
+  initialize()
+
+  function disableButton() {
+    buttonCamera.disabled = true;
+    buttonFile.disabled = true;
+    buttonSample.disabled = true;
+  }
+
+  function enableButton() {
+    buttonCamera.disabled = false;
+    buttonFile.disabled = false;
+    buttonSample.disabled = false;
+  }
 
   // カメラから画像を読みこみ
   var videoStream;
@@ -46,6 +72,9 @@ document.addEventListener("DOMContentLoaded", () => {
         videoStream = s;
         detectionVideo.srcObject = videoStream;
         detectionVideo.onloadedmetadata = e => {
+          initialize();
+          disableButton();
+
           detectionVideo.play();
           detectionOverlay.width = detectionVideo.videoWidth;
           detectionOverlay.height = detectionVideo.videoHeight;
@@ -53,8 +82,9 @@ document.addEventListener("DOMContentLoaded", () => {
           detectionVideo.width = detectionVideo.videoWidth;
           detectionVideo.height = detectionVideo.videoHeight
 
-          detectionImage.style.display = "none";
+          sectionDetection.style.display = "block";
           detectionVideo.style.display = "inline-block";
+          divDetectionButton.style.display = "block";
 
           ctrack.stop();
           ctrack.reset();
@@ -84,6 +114,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    initialize();
+    disableButton();
+
     // <img src=~>で読み込むとExifが考慮されないので
     // JavaScript-Load-Imageで読み込み
     loadImage(file, detectFromImage, {orientation: true});
@@ -108,6 +141,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   buttonSample.addEventListener("click", e => {
     e.preventDefault();
+
+    initialize();
+    disableButton();
+    divSampleSource.style.display = "block";
 
     var id = (previousSample+1)%3;
     previousSample = id;
@@ -145,8 +182,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     detectionImage.getContext("2d").drawImage(image, 0, 0, w, h);
 
+    sectionDetection.style.display = "block";
     detectionImage.style.display = "inline-block";
-    detectionVideo.style.display = "none";
 
     ctrack.stop();
     ctrack.reset();
@@ -175,6 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (trackingMode!=1)
       return;
     stopDetection();
+    enableButton();
     log("Failed to detect face (not found)");
   });
 
@@ -182,6 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (trackingMode!=1)
       return;
     stopDetection();
+    enableButton();
     log("Failed to detect face (lost)");
   });
 
@@ -230,6 +269,10 @@ document.addEventListener("DOMContentLoaded", () => {
   var canvasZAveraged;
 
   function makeAverageFace(image) {
+    sectionAveraging.style.display = "block";
+    selector.value = 1;
+    selector.disabled = true;
+
     // 右目の中心が(61+48, 84+48)、左目の中心が(101+48, 84+48)になるように貼り付け
     var pos = ctrack.getCurrentPosition();
     var eye_rx = pos[27][0];
@@ -343,7 +386,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    selector.value = 1;
+    selector.disabled = false;
+    enableButton();
   }
 
   selector.addEventListener("input", () => {

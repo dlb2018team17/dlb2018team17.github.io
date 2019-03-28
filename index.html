@@ -59,17 +59,17 @@ main {
         </button>
         <input id="inputFile" type="file" style="display:none">
       </div>
-      <div class="section">
+      <div id="sectionDetection" class="section">
         <h5>顔認識</h5>
         <div style="position: relative">
           <canvas id="detectionImage"></canvas>
           <video id="detectionVideo" playsinline></video>
           <canvas id="detectionOverlay" style="position: absolute; top: 0px; left: 0px"></canvas>
         </div>
-        <div>
+        <div id="divSampleSource">
           <a id="sampleSource"></a>
         </div>
-        <div>
+        <div id="divDetectionButton">
           <button id="detectionOK" class="btn waves-effect waves-light">
             <i class="material-icons left">check</i>
             OK
@@ -80,7 +80,7 @@ main {
           </button>
         </div>
       </div>
-      <div class="section">
+      <div id="sectionAveraging" class="section">
         <h5>平均化</h5>
         <div>
           <canvas id="averageCanvas" width="256" height="272"></canvas>
