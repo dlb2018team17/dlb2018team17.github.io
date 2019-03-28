@@ -304,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
     detectionImage.width = image.width;
     detectionImage.height = image.height;
     detectionImage.getContext("2d").drawImage(
-      detectionVideo, 0, 0, detectionImage.width, detectionImage.height);
+      image, 0, 0, detectionImage.width, detectionImage.height);
 
     detectionImage.style.display = "inline-block";
     detectionVideo.style.display = "none";
