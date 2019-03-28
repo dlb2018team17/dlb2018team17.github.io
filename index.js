@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 1: 画像用にトラッキング中
   // 2: 動画用にトラッキング中
   var trackingMode = 0;
+  var lastPosition;
 
   function initialize() {
     sectionDetection.style.display = "none";
@@ -91,6 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           ctrack.stop();
           ctrack.reset();
+          lastPosition = undefined;
           ctrack.start(detectionVideo);
           trackingMode = 2;
           drawDetection();
@@ -190,6 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ctrack.stop();
     ctrack.reset();
+    lastPosition = undefined;
     ctrack.start(detectionImage);
     trackingMode = 1;
     drawDetection();
@@ -199,7 +202,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function drawDetection() {
     detectionOverlay.getContext("2d").clearRect(
       0, 0, detectionOverlay.width, detectionOverlay.height);
-    if (ctrack.getCurrentPosition()) {
+    var position = ctrack.getCurrentPosition();
+    if (position) {
+      lastPosition = position;
       ctrack.draw(detectionOverlay);
     }
     drawDetectionRequest = requestAnimationFrame(drawDetection);
@@ -223,8 +228,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (trackingMode!=1)
       return;
     stopDetection();
-    enableButton();
     log("Failed to detect face (lost)");
+
+    if (lastPosition) {
+      log("Use the last detected position");
+      makeAverageFace(originalImage);
+    } else {
+      enableButton();
+    }
   });
 
   // 認識成功
@@ -241,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
   detectionOK.addEventListener("click", e => {
     e.preventDefault();
 
-    if (!ctrack.getCurrentPosition())
+    if (!lastPosition)
       return;
 
     detectionOK.disabled = true;
@@ -296,7 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
     averageOriginal.disabled = true;
 
     // 右目の中心が(61+48, 84+48)、左目の中心が(101+48, 84+48)になるように貼り付け
-    var pos = ctrack.getCurrentPosition();
+    var pos = ctrack.getCurrentPosition() || lastPosition;
     var eye_rx = pos[27][0];
     var eye_ry = pos[27][1];
     var eye_lx = pos[32][0];
