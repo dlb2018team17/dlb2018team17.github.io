@@ -72,47 +72,51 @@ main {
       <div class="divider"></div>
       <div id="sectionDetection" class="section">
         <h5>顔認識</h5>
-        <p style="position: relative">
-          <canvas id="detectionImage"></canvas>
-          <video id="detectionVideo" playsinline></video>
-          <canvas id="detectionOverlay" style="position: absolute; top: 0px; left: 0px"></canvas>
-        </p>
-        <p id="divSampleSource">
-          <a id="sampleSource" target="_blank"></a>
-        </p>
-        <p id="divDetectionButton">
-          <button id="detectionOK" class="btn waves-effect waves-light">
-            <i class="material-icons left">check</i>
-            OK
-          </button>
-          <button id="detectionCancel" class="btn waves-effect waves-light">
-            <i class="material-icons left">cancel</i>
-            キャンセル
-          </button>
-        </p>
+        <div style="margin-left: 1em">
+          <p style="position: relative">
+            <canvas id="detectionImage"></canvas>
+            <video id="detectionVideo" playsinline></video>
+            <canvas id="detectionOverlay" style="position: absolute; top: 0px; left: 0px"></canvas>
+          </p>
+          <p id="divSampleSource">
+            <a id="sampleSource" target="_blank"></a>
+          </p>
+          <p id="divDetectionButton">
+            <button id="detectionOK" class="btn waves-effect waves-light">
+              <i class="material-icons left">check</i>
+              OK
+            </button>
+            <button id="detectionCancel" class="btn waves-effect waves-light">
+              <i class="material-icons left">cancel</i>
+              キャンセル
+            </button>
+          </p>
+        </div>
       </div>
       <div class="divider"></div>
       <div id="sectionAveraging" class="section">
         <h5>平均化</h5>
-        <div>
-          <canvas id="averageCanvas" width="256" height="272"></canvas>
+        <div style="margin-left: 1em">
+          <div>
+            <canvas id="averageCanvas" width="256" height="272"></canvas>
+          </div>
+          <p>
+            <div>
+              <label>
+                <span>平均化率:</span>
+                <div class="range-field" style="width: 256px">
+                  <input id="averageSelector" type="range" min="0" max="100" step="10">
+                </div>
+              </label>
+            </div>
+            <div>
+              <label>
+                <input id="averageOriginal" type="checkbox">
+                <span>元の顔を表示</span>
+              </label>
+            </div>
+          </p>
         </div>
-        <p>
-          <div>
-            <label>
-              <span>平均化率:</span>
-              <div class="range-field" style="width: 256px">
-                <input id="averageSelector" type="range" min="0" max="100" step="10">
-              </div>
-            </label>
-          </div>
-          <div>
-            <label>
-              <input id="averageOriginal" type="checkbox">
-              <span>元画像を表示</span>
-            </label>
-          </div>
-        </p>
       </div>
       <div class="divider"></div>
       <div class="section">
