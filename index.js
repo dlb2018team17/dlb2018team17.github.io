@@ -113,8 +113,26 @@ document.addEventListener("DOMContentLoaded", () => {
           changeProgress(1);
 
           detectionVideo.play();
-          detectionOverlay.width = detectionVideo.videoWidth;
-          detectionOverlay.height = detectionVideo.videoHeight;
+
+          // 幅も高さも320px以下になるように表示を縮小
+          var w = detectionVideo.videoWidth;
+          var h = detectionVideo.videoHeight;
+          if (w>h && w>320) {
+            h *= 320/w;
+            w = 320;
+          } else if (h>320) {
+            w *= 320/h;
+            h = 320;
+          }
+          w |= 0
+          h |= 0
+          detectionVideo.style.width = w+"px";
+          detectionVideo.style.height = h+"px";
+          detectionVideo.cssWidth = w;
+          detectionVideo.cssHeight = h;
+          detectionOverlay.width = w;
+          detectionOverlay.height = h;
+
           // これを設定しておかないとclmtrackrがエラーになる
           detectionVideo.width = detectionVideo.videoWidth;
           detectionVideo.height = detectionVideo.videoHeight
@@ -239,12 +257,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 顔認識の結果を表示
   function drawDetection() {
-    detectionOverlay.getContext("2d").clearRect(
-      0, 0, detectionOverlay.width, detectionOverlay.height);
     var position = ctrack.getCurrentPosition();
     if (position) {
       lastPosition = position;
+
+      var ctx = detectionOverlay.getContext("2d");
+      ctx.clearRect(0, 0, detectionOverlay.width, detectionOverlay.height);
+
+      // カメラはCSSで表示を縮小しているので合わせる
+      ctx.save();
+      if (trackingMode == 2) {
+        var r = detectionVideo.videoWidth / detectionVideo.cssWidth;
+        ctx.scale(1/r, 1/r);
+        ctx.lineWidth = r;
+      }
       ctrack.draw(detectionOverlay);
+      ctx.restore();
     }
     drawDetectionRequest = requestAnimationFrame(drawDetection);
   }
@@ -272,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (lastPosition) {
       log("Use the last detected position");
-      makeAverageFace(originalImage);
+      makeAverageFace(originalImage, detectionImage.width);
     } else {
       enableButton();
       changeProgress(0);
@@ -286,7 +314,7 @@ document.addEventListener("DOMContentLoaded", () => {
     stopDetection();
     log("Succeeded to detect face");
 
-    makeAverageFace(originalImage);
+    makeAverageFace(originalImage, detectionImage.width);
   });
 
   // カメラからの撮影でOKをクリック
@@ -311,15 +339,15 @@ document.addEventListener("DOMContentLoaded", () => {
     videoStream.getVideoTracks()[0].stop();
 
     // 画像用のキャンパスに表示
-    detectionImage.width = image.width;
-    detectionImage.height = image.height;
+    detectionImage.width = detectionVideo.cssWidth;
+    detectionImage.height = detectionVideo.cssHeight;
     detectionImage.getContext("2d").drawImage(
       image, 0, 0, detectionImage.width, detectionImage.height);
 
     detectionImage.style.display = "inline-block";
     detectionVideo.style.display = "none";
 
-    makeAverageFace(image);
+    makeAverageFace(image, detectionVideo.width);
   });
 
   // カメラからの撮影でキャンセルをクリック
@@ -341,7 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
   var canvasZOriginal;
   var canvasZAveraged;
 
-  function makeAverageFace(image) {
+  function makeAverageFace(image, trackWidth) {
     sectionAveraging.style.display = "block";
     averageSelector.value = 0;
     averageSelector.disabled = true;
@@ -356,7 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
     var eye_ly = pos[32][1];
 
     // 縮小前の画像の位置に変換
-    var r = image.width / detectionOverlay.width;
+    var r = image.width / trackWidth;
     eye_rx *= r;
     eye_ry *= r;
     eye_lx *= r;
