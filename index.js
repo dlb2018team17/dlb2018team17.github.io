@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   var averageSelector = document.getElementById("averageSelector");
   var averageOriginal = document.getElementById("averageOriginal");
   var divLog = document.getElementById("divLog");
+  var background = document.getElementById("background");
 
   function log(message) {
     status.textContent = message;
@@ -27,6 +28,15 @@ document.addEventListener("DOMContentLoaded", () => {
     var div = document.createElement("div");
     div.textContent = message;
     divLog.appendChild(div);
+  }
+
+  var useWebGL = location.search.search("nowebgl") < 0;
+  if (useWebGL) {
+    background.href = "?nowebgl";
+    background.textContent = "WebGL → CPU";
+  } else {
+    background.href = ".";
+    background.textContent = "CPU → WebGL";
   }
 
   // 0: 0%, 1: 進行中, 2: 100%
@@ -45,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // フェイストラッキング
-  var ctrack = new clm.tracker();
+  var ctrack = new clm.tracker({useWebGL: useWebGL});
   ctrack.init();
   // 0: トラッキング無し
   // 1: 画像用にトラッキング中
@@ -395,6 +405,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function makeAverageFaceAsync() {
     if (!model) {
+      var background = useWebGL ? "webgl" : "cpu";
+      log(`Use background ${background}`);
+      tf.setBackend(background);
+
       log("Loding model");
       model = await tf.loadGraphModel("model/tensorflowjs_model.pb");
       log("Model loaded");
