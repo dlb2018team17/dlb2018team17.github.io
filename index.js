@@ -437,7 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
       log(`Use background ${background}`);
       tf.setBackend(background);
 
-      log("Loding model");
+      log("Loading model");
       model = await tf.loadGraphModel("model/tensorflowjs_model.pb");
       log("Model loaded");
     }
